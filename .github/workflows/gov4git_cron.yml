@@ -1,0 +1,50 @@
+name: Governance cron
+
+on:
+     workflow_dispatch: # allows manual triggering
+     schedule:
+     - cron: '*/2 * * * *'  # every 2 minutes
+
+jobs:
+     sync_github:
+          environment: gov4git:governance
+          runs-on: ubuntu-latest
+          permissions:
+               contents: write
+          steps:
+               # checkout governance repo to gain access to assets in .github directory
+               - name: 'Checkout gov4git code'
+                 uses: actions/checkout@v4
+               # 
+               # https://github.com/actions/setup-python?tab=readme-ov-file#caching-packages-dependencies
+               - name: 'Setup python'
+                 uses: actions/setup-python@v5
+                 with:
+                    python-version: '3.11'
+                    architecture: 'x64'
+                    cache: 'pip'
+               - run: pip install -r .github/python/requirements.txt
+               #
+               - name: 'Install gov4git from release'
+                 uses: jaxxstorm/action-install-gh-release@v1.10.0
+                 with:
+                    repo: gov4git/gov4git # binary is added to the PATH as well
+                    tag: ${{ vars.GOV4GIT_RELEASE }}
+                    cache: enable
+                    platform: linux
+                    arch: x86_64
+               - name: 'Prepare script permissions'
+                 shell: bash
+                 run: chmod a+x .github/scripts/gov4git_cron.sh
+               - name: 'Perform cron tasks'
+                 shell: bash
+                 run: .github/scripts/gov4git_cron.sh
+                 env:
+                    ORGANIZER_GITHUB_TOKEN: ${{ secrets.ORGANIZER_GITHUB_TOKEN }}
+                    PROJECT_OWNER: ${{ vars.PROJECT_OWNER }}
+                    PROJECT_REPO: ${{ vars.PROJECT_REPO }}
+                    GOV_PUBLIC_REPO_URL: ${{ vars.GOV_PUBLIC_REPO_URL }}
+                    GOV_PRIVATE_REPO_URL: ${{ vars.GOV_PRIVATE_REPO_URL }}
+                    SYNC_GITHUB_FREQ: ${{ vars.SYNC_GITHUB_FREQ }}
+                    SYNC_COMMUNITY_FREQ: ${{ vars.SYNC_COMMUNITY_FREQ }}
+                    SYNC_FETCH_PAR: ${{ vars.SYNC_FETCH_PAR }}
