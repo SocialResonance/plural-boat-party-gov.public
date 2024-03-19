@@ -1,0 +1,1 @@
+{"id":"3u777pzn43hmsqdxaj7xqx3z3koyzvwbh3uolsdm3ydftqc3wm4q","stamp":"2024-03-19T01:29:50.570061173Z","payload":{"op":"account_transfer_overdraft","note":"directive from GitHub issue #3","args":{"amount":{"asset":"plural","quantity":1250},"from":"treasury+issue","to":"user:bastinjafari"}}}
